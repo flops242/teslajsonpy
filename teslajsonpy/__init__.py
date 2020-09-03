@@ -8,13 +8,14 @@ https://github.com/zabuldon/teslajsonpy
 from teslajsonpy.controller import Controller
 from teslajsonpy.exceptions import TeslaException, UnknownPresetMode
 from teslajsonpy.homeassistant.battery_sensor import Battery, Range
+from teslajsonpy.homeassistant.shift_sensor import ShiftState
 from teslajsonpy.homeassistant.binary_sensor import (
     ChargerConnectionSensor,
     OnlineSensor,
     ParkingSensor,
     UpdateSensor,
 )
-from teslajsonpy.homeassistant.charger import ChargerSwitch, ChargingSensor, RangeSwitch
+from teslajsonpy.homeassistant.charger import ChargerSwitch, ChargingSensor, RangeSwitch, ChargeLimitSlider
 from teslajsonpy.homeassistant.climate import Climate, TempSensor
 from teslajsonpy.homeassistant.gps import GPS, Odometer
 from teslajsonpy.homeassistant.lock import Lock
@@ -33,6 +34,8 @@ __all__ = [
     "UpdateSensor",
     "ChargerSwitch",
     "RangeSwitch",
+    "ShiftState",
+    "ChargeLimitSlider",
     "Climate",
     "TempSensor",
     "Controller",

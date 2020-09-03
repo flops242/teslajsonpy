@@ -10,6 +10,8 @@ from typing import Dict, Optional, Text
 
 from teslajsonpy.homeassistant.vehicle import VehicleDevice
 
+CHARGE_LIMIT_SOC_MIN = 50
+CHARGE_LIMIT_SOC_MAX = 100
 
 class ChargerSwitch(VehicleDevice):
     """Home-Assistant class for the charger of a Tesla VehicleDevice."""
@@ -142,6 +144,62 @@ class RangeSwitch(VehicleDevice):
     def is_maxrange(self):
         """Return whether max range setting is set."""
         return self.__maxrange_state
+
+    @staticmethod
+    def has_battery():
+        """Return whether the device has a battery."""
+        return False
+
+
+class ChargeLimitSlider(VehicleDevice):
+    """Home-Assistant class for setting charge limit."""
+
+    def __init__(self, data, controller):
+        """Initialize the charge limit slider."""
+        super().__init__(data, controller)
+        self.__manual_update_time = 0
+        self.__charge_limit_soc = 0
+        self.type = "chargelimit slider"
+        self.hass_type = "light"
+        self.name = self._name()
+        self.uniq_name = self._uniq_name()
+        self.bin_type = 0x9
+
+    async def async_update(self, wake_if_asleep=False, force=False) -> None:
+        """Update the charge limit."""
+        await super().async_update(wake_if_asleep=wake_if_asleep)
+        self.refresh()
+
+    def refresh(self) -> None:
+        """Refresh data.
+
+        This assumes the controller has already been updated
+        """
+        super().refresh()
+        last_update = self._controller.get_last_update_time(self._id)
+        if last_update >= self.__manual_update_time:
+            data = self._controller.get_charging_params(self._id)
+            if data:
+                self.__charge_limit_soc = data["charge_limit_soc"]
+
+    async def set_charge_limit_soc(self, soc):
+        """Set the charge limit soc to soc."""
+        soc = int(round(soc))
+        if (soc < CHARGE_LIMIT_SOC_MIN) or (soc > CHARGE_LIMIT_SOC_MAX):
+            raise ValueError("Charge limit must be between %d and %d" % (CHARGE_LIMIT_SOC_MIN, CHARGE_LIMIT_SOC_MAX))
+        self.__manual_update_time = time.time()
+        data = await self._controller.command(
+            self._id,
+            "set_charge_limit",
+            {"percent": soc},
+            wake_if_asleep=True,
+        )
+        if data and data["response"]["result"]:
+            self.__charge_limit_soc = soc
+
+    def get_charge_limit_soc(self):
+        """Return the charge limit soc."""
+        return self.__charge_limit_soc
 
     @staticmethod
     def has_battery():

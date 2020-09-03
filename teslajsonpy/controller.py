@@ -23,13 +23,14 @@ from teslajsonpy.const import (
 )
 from teslajsonpy.exceptions import RetryLimitError, TeslaException
 from teslajsonpy.homeassistant.battery_sensor import Battery, Range
+from teslajsonpy.homeassistant.shift_sensor import ShiftState
 from teslajsonpy.homeassistant.binary_sensor import (
     ChargerConnectionSensor,
     OnlineSensor,
     ParkingSensor,
     UpdateSensor,
 )
-from teslajsonpy.homeassistant.charger import ChargerSwitch, ChargingSensor, RangeSwitch
+from teslajsonpy.homeassistant.charger import ChargerSwitch, ChargingSensor, RangeSwitch, ChargeLimitSlider
 from teslajsonpy.homeassistant.climate import Climate, TempSensor
 from teslajsonpy.homeassistant.gps import GPS, Odometer
 from teslajsonpy.homeassistant.lock import ChargerLock, Lock
@@ -495,6 +496,8 @@ class Controller:
         self.__components.append(ChargingSensor(car, self))
         self.__components.append(ChargerSwitch(car, self))
         self.__components.append(RangeSwitch(car, self))
+        self.__components.append(ShiftState(car, self))
+        self.__components.append(ChargeLimitSlider(car, self))
         self.__components.append(ParkingSensor(car, self))
         self.__components.append(GPS(car, self))
         self.__components.append(Odometer(car, self))
